@@ -3,55 +3,7 @@ FizzBuzzゲームスキル
 """
 
 import random
-
-# --------------- Helpers that build all of the responses ----------------------
-# TODO コードを分ける
-
-def build_speechlet_response(card, output, reprompt_text, should_end_session):
-    speech_dict = {'shouldEndSession': should_end_session}
-    
-    speech_dict['outputSpeech'] = {
-        'type': 'SSML',
-        'ssml': '<speak> ' + output + ' </speak>'
-    }
-    
-    if card != None:
-        speech_dict['card'] = {
-            'type': 'Simple',
-            'title': card['title'],
-            'content': card['output']
-        }
-            
-    if reprompt_text != None:
-        speech_dict['reprompt'] = {
-            'outputSpeech': {
-                'type': 'SSML',
-                'ssml': '<speak> ' + reprompt_text + ' </speak>'
-            }
-        }
-        
-    return speech_dict
-
-
-def build_response(session_attributes, speechlet_response):
-    return {
-        'version': '1.0',
-        'sessionAttributes': session_attributes,
-        'response': speechlet_response
-    }
-
-def alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict):
-    should_end_session = False
-    return build_response(session_attributes, build_speechlet_response(
-        card_dict, speech_output, reprompt_text, should_end_session
-    ))
-
-def alexa_emit_tel(session_attributes, speech_output, card_dict):
-    should_end_session = True
-    return build_response(session_attributes, build_speechlet_response(
-        card_dict, speech_output, None, should_end_session
-    ))
-    
+import myask as ask
 
 # --------------- Functions that control the skill's behavior ------------------
 
@@ -63,19 +15,19 @@ def get_welcome_response():
     session_attributes = {}
     
     # 応答text
-    speech_output = "フィズバズゲームスキルへようこそ。" \
-                    "このスキルでは、Fizz-Buzzゲームで私と対戦することができます。" \
-                    "試しに、「ゲームスタート」、や、「Fizz-Buzzゲームをしよう」、" \
-                    "のように話しかけてみてください。"
+    speech_output = 'フィズバズゲームスキルへようこそ。' \
+                    'このスキルでは、フィズバズゲームで私と対戦することができます。' \
+                    '試しに、「ゲームスタート」、や、「フィズバズゲームをしよう」、' \
+                    'のように話しかけてみてください。'
     # 8秒間発話がなかった場合に聞き返すためのtext 
-    reprompt_text = "試しに、「ゲームスタート」、や、「Fizz-Buzzゲームをしよう」、" \
-                    "のように話しかけてみてください。"
+    reprompt_text = '試しに、「ゲームスタート」、や、「フィズバズゲームをしよう」、' \
+                    'のように話しかけてみてください。'
 
     # カード情報
-    card_dict['title'] = "ようこそ"
-    card_dict['output'] = speech_output
+    card_dict['title'] = 'ようこそ'
+    card_dict['output'] = 'このスキルでは、フィズバズゲームで私と対戦することができます。'
 
-    return alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
+    return ask.alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
 
 # AMAZON.HelpIntent
 def get_help_response():
@@ -86,19 +38,19 @@ def get_help_response():
     session_attributes = {}
     
     # 応答text
-    speech_output = "Fizz-Buzzゲームをします。一から順に数字を読み上げ、その数字が三で割り切れるときはFizz、" \
-                    "五で割り切れるときはBuzz、三と五の両方で割り切れるときはFizz-Buzzを数字の代わりに言ってください。" \
-                    "間違ったり詰まったりしたら負けです。私かあなたのどちらからスタートするかは私が決めます。" \
-                    "「ゲームスタート」、や、「Fizz-Buzzゲームをしよう」、のように話しかけてみてください。"
+    speech_output = 'フィズバズゲームをします。一から順に数字を読み上げ、その数字が三で割り切れるときはフィズ、' \
+                    '五で割り切れるときはバズ、三と五の両方で割り切れるときはフィズバズを数字の代わりに言ってください。' \
+                    '間違ったり詰まったりしたら負けです。私かあなたのどちらからスタートするかは私が決めます。' \
+                    '「ゲームスタート」、や、「フィズバズゲームをしよう」、のように話しかけてみてください。'
     # 8秒間発話がなかった場合に聞き返すためのtext 
-    reprompt_text = '機能を使うために、「ゲームスタート」、や、「Fizz-Buzzゲームをしよう」、' \
+    reprompt_text = '機能を使うために、「ゲームスタート」、や、「フィズバズゲームをしよう」、' \
                     'のように話しかけてみてください。'
 
     # カード情報
-    card_dict['title'] = "機能説明"
+    card_dict['title'] = '機能説明'
     card_dict['output'] = speech_output
         
-    return alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
+    return ask.alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
 
 # AMAZON.CancelIntent, AMAZON.StopIntent
 def handle_session_end_request():
@@ -115,7 +67,7 @@ def handle_session_end_request():
     card_dict['title'] = 'さようなら'
     card_dict['output'] = speech_output
 
-    return alexa_emit_tel(session_attributes, speech_output, card_dict)
+    return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
 
 ## Custom Intent
 
@@ -145,7 +97,7 @@ def intent_fb_start_game(intent, session):
     # カード情報
     card_dict['title'] = 'ゲーム開始'
             
-    return alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
+    return ask.alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
 
 ## intentFbNumFizzBuzz
 def intent_fb_num_fizz_buzz(intent, session):
@@ -182,75 +134,75 @@ def intent_fb_num_fizz_buzz(intent, session):
 
         if has_num == False and has_fb == False:
             speech_output = 'うまく聞き取れませんでした。もう一度お願いします。'
-            reprompt_text = 'もう一度、数字かFizz-Buzzを言ってください。'
+            reprompt_text = 'もう一度、数字かフィズバズを言ってください。'
             session_attributes['current_num'] = current_num
             card_dict['title'] = '！？'
             card_dict['output'] = 'うまく聞き取れませんでした。もう一度お願いします。'
-            return alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
+            return ask.alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
 
         if current_num % 3 == 0 and current_num % 5 == 0:
-            # Fizz-Buzz
+            # フィズバズ
             if has_num:
-                speech_output = '{num}ではなく、Fizz-Buzzが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num=intent_num)
+                speech_output = '{num}ではなく、フィズバズが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num=intent_num)
                 card_dict['title'] = '不正解です'
-                card_dict['output'] = '正解は、Fizz-Buzzです。'
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
-            elif intent_fb != 'Fizz-Buzz':
-                speech_output = '{intent_fb}ではなく、Fizz-Buzzが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb)
+                card_dict['output'] = '正解は、フィズバズです。'
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
+            elif intent_fb != 'フィズバズ':
+                speech_output = '{intent_fb}ではなく、フィズバズが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb)
                 card_dict['title'] = '不正解です'
-                card_dict['output'] = '正解は、Fizz-Buzzです。'
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
+                card_dict['output'] = '正解は、フィズバズです。'
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
         elif current_num % 3 == 0:
-            # Fizz
+            # フィズ
             if has_num:
-                speech_output = '{num}ではなく、Fizzが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num=intent_num)
+                speech_output = '{num}ではなく、フィズが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num=intent_num)
                 card_dict['title'] = '不正解です'
-                card_dict['output'] = '正解は、Fizzです。'
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
-            elif intent_fb != 'Fizz':
-                speech_output = '{intent_fb}ではなく、Fizzが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb)
+                card_dict['output'] = '正解は、フィズです。'
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
+            elif intent_fb != 'フィズ':
+                speech_output = '{intent_fb}ではなく、フィズが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb)
                 card_dict['title'] = '不正解です'
-                card_dict['output'] = '正解は、Fizzです。'
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
+                card_dict['output'] = '正解は、フィズです。'
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
         elif current_num % 5 == 0:
-            # Buzz
+            # バズ
             if has_num:
-                speech_output = '{num}ではなく、Buzzが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num=intent_num)
+                speech_output = '{num}ではなく、バズが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num=intent_num)
                 card_dict['title'] = '不正解です'
-                card_dict['output'] = '正解は、Buzzです。'
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
-            elif intent_fb != 'Buzz':
-                speech_output = '{intent_fb}ではなく、Buzzが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb)
+                card_dict['output'] = '正解は、バズです。'
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
+            elif intent_fb != 'バズ':
+                speech_output = '{intent_fb}ではなく、バズが正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb)
                 card_dict['title'] = '不正解です'
-                card_dict['output'] = '正解は、Buzzです。'
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
+                card_dict['output'] = '正解は、バズです。'
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
         else:
             # number
             if has_fb:
                 speech_output = '{intent_fb}ではなく、{num}が正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(intent_fb=intent_fb, num=current_num)
                 card_dict['title'] = '不正解です'
                 card_dict['output'] = '正解は、{num}です。'.format(num=current_num)
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
             elif intent_num != current_num:
                 speech_output = '{num_w}ではなく、{num_c}が正解です。残念ながら私の勝ちです。またお相手してくださいね。'.format(num_w=intent_num, num_c=current_num)
                 card_dict['title'] = '不正解です'
                 card_dict['output'] = '正解は、{num}です。'.format(num=current_num)
-                return alexa_emit_tel(session_attributes, speech_output, card_dict)
+                return ask.alexa_emit_tel(session_attributes, speech_output, card_dict)
                 
         current_num += 1
 
         if current_num % 3 == 0 and current_num % 5 == 0:
-            # Fizz-Buzz
-            speech_output = 'Fizz-Buzz'
-            card_dict['output'] = '私の答え: Fizz-Buzz'
+            # フィズバズ
+            speech_output = 'フィズバズ'
+            card_dict['output'] = '私の答え: フィズバズ'
         elif current_num % 3 == 0:
-            # Fizz
-            speech_output = 'Fizz'
-            card_dict['output'] = '私の答え: Fizz'
+            # フィズ
+            speech_output = 'フィズ'
+            card_dict['output'] = '私の答え: フィズ'
         elif current_num % 5 == 0:
-            # Buzz
-            speech_output = 'Buzz'
-            card_dict['output'] = '私の答え: Buzz'
+            # バズ
+            speech_output = 'バズ'
+            card_dict['output'] = '私の答え: バズ'
         else:
             # number
             speech_output = '{num}'.format(num=current_num)
@@ -259,17 +211,17 @@ def intent_fb_num_fizz_buzz(intent, session):
         reprompt_text = 'あなたの番ですよ'
         card_dict['title'] = 'Fizz-Buzz'
 
-        return alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
+        return ask.alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
     else:
         speech_output = 'まだゲームがスタートしていません。ゲームを開始するために' \
-                        '「ゲームスタート」、や、「Fizz-Buzzゲームをしよう」、' \
+                        '「ゲームスタート」、や、「フィズバズゲームをしよう」、' \
                         'のように話しかけてみてください。'
-        reprompt_text = '機能を使うために、「ゲームスタート」、や、「Fizz-Buzzゲームをしよう」、' \
+        reprompt_text = '機能を使うために、「ゲームスタート」、や、「フィズバズゲームをしよう」、' \
                         'のように話しかけてみてください。'
         card_dict['title'] = 'エラー'
         card_dict['output'] = 'ゲームがまだスタートしていません。'
             
-        return alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
+        return ask.alexa_emit_ask(session_attributes, speech_output, reprompt_text, card_dict)
 
 
 # --------------- Events ------------------
