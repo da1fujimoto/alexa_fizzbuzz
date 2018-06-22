@@ -73,9 +73,9 @@ def handle_session_end_request():
 
 ## intentFbStartGame
 def intent_fb_start_game(intent, session):
-    """ Sets the color in the session and prepares the speech to reply to the
-    user.
+    """ ゲームスタートインテントがトリガーされたときの処理
     """
+
     print('request {intent}'.format(intent=intent['name']))
     
     card_dict = {}
@@ -101,6 +101,9 @@ def intent_fb_start_game(intent, session):
 
 ## intentFbNumFizzBuzz
 def intent_fb_num_fizz_buzz(intent, session):
+    """ ゲーム中のインテントがトリガーされたときの処理
+    """
+
     card_dict = {}
     session_attributes = {}
     has_num = False
